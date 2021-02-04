@@ -224,7 +224,7 @@ xdata <- rbind(bond2011, bond2012, bond2013)
 
 xdata2011 <- xdata[which(xdata$year.w == 2011),] 
 xdata2012 <- xdata[which(xdata$year.w == 2012),] 
-xdata2013 <- xdata[which(xdata$year.w == 2012),] 
+xdata2013 <- xdata[which(xdata$year.w == 2013),] 
 
 ####familiarity to neighbors#### 
 
@@ -800,5 +800,3 @@ saveRDS(zz2012, "fnbasedata_2012.Rda")
 saveRDS(zz2013, "fnbasedata_2013.Rda")
 saveRDS(zz2014, "fnbasedata_2014.Rda")
 
-###spatial stuff?
-##nooo idea how to do this 
