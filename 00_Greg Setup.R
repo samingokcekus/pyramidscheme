@@ -14,6 +14,8 @@ zz2014 <- readRDS("Data/fnbasedata_2014.Rda")
 
 zz2012 %>% bind_rows(zz2013, zz2014) -> Tits
 
+Tits %<>% rename_all(CamelConvert)
+
 # Density ####
 
 library(adehabitatHR)
@@ -30,39 +32,39 @@ SPDF <- SpatialPointsDataFrame(data = LifetimeCentroids[,c("X", "Y")],
 
 LifetimeKUDL <- kernelUD(SPDF, same4all = TRUE, grid = 500)
 
-LifetimeKUDL %>% raster::raster() %>% raster::extract(BreedingTits[,c("X", "Y")]) ->
+LifetimeKUDL %>% raster::raster() %>% raster::extract(Tits[,c("X", "Y")]) ->
   
-  BreedingTits$LifetimeDensity
+  Tits$LifetimeDensity
 
-BreedingTits %>% arrange(Year) %>% pull(Year) %>% unique %>% as.character -> FocalYears
+Tits %>% arrange(Year.w) %>% pull(Year.w) %>% unique %>% as.character -> FocalYear.ws
 
-FocalYears %<>% c(min(as.numeric(FocalYears))-1, .)
+FocalYear.ws %<>% c(min(as.numeric(FocalYear.ws))-1, .)
 
-BreedingTits %>% 
-  filter(Year %in% FocalYears) %>% 
-  group_by(`Adult female id`, Year) %>% 
+Tits %>% 
+  filter(Year.w %in% FocalYear.ws) %>% 
+  group_by(Focal.ring, Year.w) %>% 
   summarise_at(c("X", "Y"), 
                ~mean(.x, na.rm = T)) %>% 
   rename(XCentroidAnnual = X, YCentroidAnnual = Y) -> 
   
   AnnualCentroids
 
-AnnualCentroids %<>% filter(Year %in% FocalYears) %>% na.omit
+AnnualCentroids %<>% filter(Year.w %in% FocalYear.ws) %>% na.omit
 
-SPDF <- SpatialPointsDataFrame(data = AnnualCentroids[,c("XCentroidAnnual", "YCentroidAnnual", "Year")], 
+SPDF <- SpatialPointsDataFrame(data = AnnualCentroids[,c("XCentroidAnnual", "YCentroidAnnual", "Year.w")], 
                                coords = AnnualCentroids[,c("XCentroidAnnual", "YCentroidAnnual")])
 
-SPDF <- SPDF[,"Year"]
+SPDF <- SPDF[,"Year.w"]
 
 KUDL <- kernelUD(SPDF, same4all=TRUE, grid=500)
 
-2:length(FocalYears) %>% lapply(function(a){
+2:length(FocalYear.ws) %>% lapply(function(a){
   
-  print(FocalYears[a])
+  print(FocalYear.ws[a])
   
-  DF <- BreedingTits %>% filter(Year == FocalYears[a])
+  DF <- Tits %>% filter(Year.w == FocalYear.ws[a])
   
-  KUDL2 <- KUDL[[FocalYears[a]]]
+  KUDL2 <- KUDL[[FocalYear.ws[a]]]
   
   KUDL2 %>% raster::raster() %>% raster::extract(DF[,c("X", "Y")]) ->
     
@@ -72,4 +74,6 @@ KUDL <- kernelUD(SPDF, same4all=TRUE, grid=500)
   
 }) -> DensityList
 
-DensityList %>% bind_rows -> BreedingTits
+DensityList %>% bind_rows -> Tits
+
+Tits %>% saveRDS("Data/CleanData.rds")

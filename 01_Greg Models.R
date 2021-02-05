@@ -8,9 +8,7 @@ theme_set(theme_cowplot())
 
 DF <- readRDS("Data/CleanData.rds")
 
-DF %<>% rename_all(CamelConvert)
-
-DF$Num.fledglings %>% qplot
+# DF$Num.fledglings %>% qplot
 
 Resps <- c("April.hatch.date",
            "April.lay.date",
@@ -29,12 +27,19 @@ SocialCovar <- c("Degree", "BondStrength", "Betweenness", "Eigenvector",
                  #"Strength", "Strength_Mean", 
                  "Clustering")
 
+DensityCovar <- c("LifetimeDensity", "AnnualDensity")
+
 # DF %>% mutate_at(SocialCovar, ~as.numeric(as.character(.x))) %>% 
 # dplyr::select(all_of(SocialCovar)) %>% ggpairs()
 
 # DF %>% mutate_at(Resps, ~as.numeric(as.character(.x))) %>%
 #   dplyr::select(all_of(Resps)) %>%
 #   ggpairs()
+
+ClashList <- list(
+  c(SocialCovar[c(1, 3:5)]),
+  DensityCovar
+  )
 
 Covar <- c("Focal.age", "Focal.sex", "Year.w")
 
@@ -70,7 +75,8 @@ for(r in r:length(Resps)){
   }
   
   TestDF <- DF %>% 
-    dplyr::select(all_of(Covar), all_of(SocialCovar), Focal.ring, Resps[r], X, Y) %>% 
+    dplyr::select(all_of(Covar), all_of(SocialCovar), all_of(DensityCovar), 
+                  Focal.ring, Resps[r], X, Y) %>% 
     mutate_at(SocialCovar, ~as.numeric(as.character(.x))) %>%
     mutate_at(SocialCovar[3], ~log(.x+1)) %>% mutate_at(SocialCovar[4], ~kader:::cuberoot(.x)) %>% 
     na.omit
@@ -80,11 +86,11 @@ for(r in r:length(Resps)){
   IM2 <- INLAModelAdd(Data = TestDF, 
                       Response = Resps[r], 
                       Explanatory = Covar, 
-                      Add = SocialCovar,
+                      Add = SocialCovar %>% c(DensityCovar),
                       AllModels = T,
                       Base = T,
-                      Rounds = 1,
-                      Clashes = list(c(SocialCovar[c(1, 3:5)])),
+                      # Rounds = 1,
+                      Clashes = ClashList,
                       Random = "Focal.ring", RandomModel = "iid",
                       AddSpatial = T)
   
@@ -120,7 +126,9 @@ SpocialList <- list()
 r <- 1
 
 TestDF <- DF %>% 
-  dplyr::select(all_of(Covar), all_of(SocialCovar), Focal.ring, X, Y) %>% 
+  dplyr::select(all_of(Covar), 
+                all_of(DensityCovar), 
+                all_of(SocialCovar), Focal.ring, X, Y) %>% 
   mutate_at(SocialCovar, ~as.numeric(as.character(.x))) %>%
   mutate_at(SocialCovar[3], ~log(.x+1)) %>% mutate_at(SocialCovar[4], ~kader:::cuberoot(.x)) %>% 
   na.omit
@@ -134,6 +142,8 @@ for(r in r:length(SocialCovar)){
   IM2 <- INLAModelAdd(Data = TestDF, 
                       Response = SocialCovar[r], 
                       Explanatory = Covar, 
+                      Add = DensityCovar,
+                      Clashes = ClashList,
                       AllModels = T,
                       Base = T,
                       Random = "Focal.ring", RandomModel = "iid",
