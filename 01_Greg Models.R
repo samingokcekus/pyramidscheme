@@ -2,7 +2,7 @@
 # 0_Greg Script ####
 
 library(tidyverse); library(magrittr); library(ggregplot); library(cowplot); library(colorspace)
-library(GGally); library(patchwork)
+library(GGally); library(patchwork); library(dplyr)
 
 theme_set(theme_cowplot())
 
