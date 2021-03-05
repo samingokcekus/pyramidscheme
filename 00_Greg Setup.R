@@ -76,4 +76,13 @@ KUDL <- kernelUD(SPDF, same4all=TRUE, grid=500)
 
 DensityList %>% bind_rows -> Tits
 
+#adding binary success column 
+Tits$Binary.succ <- Tits$Num.fledglings
+Tits$Binary.succ <- with(Tits, ifelse(Binary.succ == 0, "0", 
+                                       Tits$Binary.succ)) 
+Tits$Binary.succ <- with(Tits, ifelse(Binary.succ > 0, "1", 
+                                      Tits$Binary.succ)) 
+
+Tits$Binary.succ <- as.numeric(Tits$Binary.succ)
+
 Tits %>% saveRDS("Data/CleanData.rds")
