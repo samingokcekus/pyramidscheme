@@ -873,7 +873,7 @@ xdata2011 <- xdata2011[,c(57,37,38)]
 territories <- sf::st_sf(geom = territories)
 territories <- sf::st_join(territories, xdata2011)
 
-#now we want to figure out who was in the neighbouring territories for each box
+#now we want to figure out who was in the neighboring territories for each box
 territories.list <- st_intersection(territories, territories)
 
 #this includes the box itself when making the comparisons so we'll remove those
@@ -882,7 +882,7 @@ territories.list <- subset(territories.list, Box.1 != Box)
 #removing the geometry column as we don't need that anymore
 st_geometry(territories.list) <- NULL
 
-#we'll remove cases where the identities of neighbours were unknown 
+#we'll remove cases where the identities of neighbors were unknown 
 #(presumably because they weren't caught or it failed before they were)
 
 
@@ -912,7 +912,7 @@ territories.list <- subset(territories.list, !is.na(Father.1) | !is.na(Mother.1)
 
 territories.list <- territories.list[,c(4,5,6,1,2,3)]
 
-colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighbouring.male", "Neighbouring.female")
+colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighboring.male", "Neighboring.female")
 
 neighbors.2011 <- territories.list  
 
@@ -957,7 +957,7 @@ xdata2012 <- xdata2012[,c(57,37,38)]
 territories <- sf::st_sf(geom = territories)
 territories <- sf::st_join(territories, xdata2012)
 
-#now we want to figure out who was in the neighbouring territories for each box
+#now we want to figure out who was in the neighboring territories for each box
 territories.list <- st_intersection(territories, territories)
 
 #this includes the box itself when making the comparisons so we'll remove those
@@ -966,7 +966,7 @@ territories.list <- subset(territories.list, Box.1 != Box)
 #removing the geometry column as we don't need that anymore
 st_geometry(territories.list) <- NULL
 
-#we'll remove cases where the identities of neighbours were unknown 
+#we'll remove cases where the identities of neighbors were unknown 
 #(presumably because they weren't caught or it failed before they were)
 
 
@@ -996,7 +996,7 @@ territories.list <- subset(territories.list, !is.na(Father.1) | !is.na(Mother.1)
 
 territories.list <- territories.list[,c(4,5,6,1,2,3)]
 
-colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighbouring.male", "Neighbouring.female")
+colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighboring.male", "Neighboring.female")
 
 neighbors.2012 <- territories.list   
 
@@ -1041,7 +1041,7 @@ xdata2013 <- xdata2013[,c(57,37,38)]
 territories <- sf::st_sf(geom = territories)
 territories <- sf::st_join(territories, xdata2013)
 
-#now we want to figure out who was in the neighbouring territories for each box
+#now we want to figure out who was in the neighboring territories for each box
 territories.list <- st_intersection(territories, territories)
 
 #this includes the box itself when making the comparisons so we'll remove those
@@ -1050,7 +1050,7 @@ territories.list <- subset(territories.list, Box.1 != Box)
 #removing the geometry column as we don't need that anymore
 st_geometry(territories.list) <- NULL
 
-#we'll remove cases where the identities of neighbours were unknown 
+#we'll remove cases where the identities of neighbors were unknown 
 #(presumably because they weren't caught or it failed before they were)
 
 
@@ -1080,7 +1080,7 @@ territories.list <- subset(territories.list, !is.na(Father.1) | !is.na(Mother.1)
 
 territories.list <- territories.list[,c(4,5,6,1,2,3)]
 
-colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighbouring.male", "Neighbouring.female")
+colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighboring.male", "Neighboring.female")
 
 neighbors.2013 <- territories.list  
 
@@ -1125,7 +1125,7 @@ xdata2014 <- xdata2014[,c(57,37,38)]
 territories <- sf::st_sf(geom = territories)
 territories <- sf::st_join(territories, xdata2014)
 
-#now we want to figure out who was in the neighbouring territories for each box
+#now we want to figure out who was in the neighboring territories for each box
 territories.list <- st_intersection(territories, territories)
 
 #this includes the box itself when making the comparisons so we'll remove those
@@ -1134,7 +1134,7 @@ territories.list <- subset(territories.list, Box.1 != Box)
 #removing the geometry column as we don't need that anymore
 st_geometry(territories.list) <- NULL
 
-#we'll remove cases where the identities of neighbours were unknown 
+#we'll remove cases where the identities of neighbors were unknown 
 #(presumably because they weren't caught or it failed before they were)
 
 
@@ -1164,12 +1164,12 @@ territories.list <- subset(territories.list, !is.na(Father.1) | !is.na(Mother.1)
 
 territories.list <- territories.list[,c(4,5,6,1,2,3)]
 
-colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighbouring.male", "Neighbouring.female")
+colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighboring.male", "Neighboring.female")
 
 neighbors.2014 <- territories.list  
 
 
-#### get data to merge with 
+#### get data to merge with  ####
 setwd("~/Documents/2/Familiar_neighbors/familiarneighbor/Data")
 DF <- readRDS("CleanData.rds")
 DF$Binary.succ <- DF$Num.fledglings
@@ -1201,103 +1201,346 @@ temp$N.num <- 10 - (temp$sumna)
 
 DF$N.num <- temp$N.num
 
+#### make dataframe for identifying neighbors from previous years ####
+
+#change NA ids to UNKNOWN 
+neighbors.2011$Focal.male <- with(neighbors.2011, ifelse(is.na(Focal.male), "UNKNOWN", Focal.male)) 
+neighbors.2011$Focal.female <- with(neighbors.2011, ifelse(is.na(Focal.female), "UNKNOWN", Focal.female)) 
+neighbors.2011$Neighboring.male <- with(neighbors.2011, ifelse(is.na(Neighboring.male), "UNKNOWN", Neighboring.male)) 
+neighbors.2011$Neighboring.female <- with(neighbors.2011, ifelse(is.na(Neighboring.female), "UNKNOWN", Neighboring.female)) 
+
+neighbors.2012$Focal.male <- with(neighbors.2012, ifelse(is.na(Focal.male), "UNKNOWN", Focal.male)) 
+neighbors.2012$Focal.female <- with(neighbors.2012, ifelse(is.na(Focal.female), "UNKNOWN", Focal.female)) 
+neighbors.2012$Neighboring.male <- with(neighbors.2012, ifelse(is.na(Neighboring.male), "UNKNOWN", Neighboring.male)) 
+neighbors.2012$Neighboring.female <- with(neighbors.2012, ifelse(is.na(Neighboring.female), "UNKNOWN", Neighboring.female)) 
+
+neighbors.2013$Focal.male <- with(neighbors.2013, ifelse(is.na(Focal.male), "UNKNOWN", Focal.male)) 
+neighbors.2013$Focal.female <- with(neighbors.2013, ifelse(is.na(Focal.female), "UNKNOWN", Focal.female)) 
+neighbors.2013$Neighboring.male <- with(neighbors.2013, ifelse(is.na(Neighboring.male), "UNKNOWN", Neighboring.male)) 
+neighbors.2013$Neighboring.female <- with(neighbors.2013, ifelse(is.na(Neighboring.female), "UNKNOWN", Neighboring.female)) 
 
 #make a column with neighbor pairs, year, and "true" 
-N2011 <- as.data.frame(with(neighbors.2011, paste(Focal.box, Box.N, sep="_")))
-names(N2011)[1] <- "boxes"
+#2011
+N2011.a <- as.data.frame(with(neighbors.2011, paste(Focal.box, Box.N, sep="_")))
+names(N2011.a)[1] <- "boxes"
+N2011.b <- as.data.frame(with(neighbors.2011, paste(Focal.male, Neighboring.male, sep="_")))
+names(N2011.b)[1] <- "ring_ring"
+N2011.c <- as.data.frame(with(neighbors.2011, paste(Focal.male, Neighboring.female, sep="_")))
+names(N2011.c)[1] <- "ring_ring"
+N2011.d <- as.data.frame(with(neighbors.2011, paste(Focal.female, Neighboring.female, sep="_")))
+names(N2011.d)[1] <- "ring_ring"
+N2011.e <- as.data.frame(with(neighbors.2011, paste(Focal.female, Neighboring.male, sep="_")))
+names(N2011.e)[1] <- "ring_ring"
+
+N2011 <- rbind(N2011.b, N2011.c, N2011.d, N2011.e)
+rm(N2011.b, N2011.c, N2011.d, N2011.e)
 N2011$neighbors <- TRUE
 N2011$Year.s <- 2012
 
-N2012 <- as.data.frame(with(neighbors.2012, paste(Focal.box, Box.N, sep="_")))
-names(N2012)[1] <- "boxes"
+
+#2012
+N2012.a <- as.data.frame(with(neighbors.2012, paste(Focal.box, Box.N, sep="_")))
+names(N2012.a)[1] <- "boxes"
+N2012.b <- as.data.frame(with(neighbors.2012, paste(Focal.male, Neighboring.male, sep="_")))
+names(N2012.b)[1] <- "ring_ring"
+N2012.c <- as.data.frame(with(neighbors.2012, paste(Focal.male, Neighboring.female, sep="_")))
+names(N2012.c)[1] <- "ring_ring"
+N2012.d <- as.data.frame(with(neighbors.2012, paste(Focal.female, Neighboring.female, sep="_")))
+names(N2012.d)[1] <- "ring_ring"
+N2012.e <- as.data.frame(with(neighbors.2012, paste(Focal.female, Neighboring.male, sep="_")))
+names(N2012.e)[1] <- "ring_ring"
+
+N2012 <- rbind(N2012.b, N2012.c, N2012.d, N2012.e)
+rm(N2012.b, N2012.c, N2012.d, N2012.e)
 N2012$neighbors <- TRUE
 N2012$Year.s <- 2013
 
-N2013 <- as.data.frame(with(neighbors.2013, paste(Focal.box, Box.N, sep="_")))
-names(N2013)[1] <- "boxes"
+
+#2013
+N2013.a <- as.data.frame(with(neighbors.2013, paste(Focal.box, Box.N, sep="_")))
+names(N2013.a)[1] <- "boxes"
+N2013.b <- as.data.frame(with(neighbors.2013, paste(Focal.male, Neighboring.male, sep="_")))
+names(N2013.b)[1] <- "ring_ring"
+N2013.c <- as.data.frame(with(neighbors.2013, paste(Focal.male, Neighboring.female, sep="_")))
+names(N2013.c)[1] <- "ring_ring"
+N2013.d <- as.data.frame(with(neighbors.2013, paste(Focal.female, Neighboring.female, sep="_")))
+names(N2013.d)[1] <- "ring_ring"
+N2013.e <- as.data.frame(with(neighbors.2013, paste(Focal.female, Neighboring.male, sep="_")))
+names(N2013.e)[1] <- "ring_ring"
+
+N2013 <- rbind(N2013.b, N2013.c, N2013.d, N2013.e)
+rm(N2013.b, N2013.c, N2013.d, N2013.e)
 N2013$neighbors <- TRUE
 N2013$Year.s <- 2014
 
-N3 <- rbind(N2011, N2012, N2013)
+N_123 <- rbind(N2011, N2012, N2013)
+
+N_123_full <- N_123[!grepl("UNKNOWN", N_123$ring_ring),]
+
 
 #each neighbor at a time
+
 #N1 
-DF$boxes <-(with(DF, paste(Box, N1, sep="_")))
-names(N3)[2] <- "N1.fp"
-DF.temp <- merge(DF, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+#DF$ring_ring <-(with(DF, paste(Focal.ring, N1.mother, sep="_")))
+#names(N_123_full)[2] <- "N1.MOTHERfp"
+#DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N1.father, sep="_")))
+#names(N_123_full)[2] <- "N1.FATHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+
+DF$ring_ring <-(with(DF, paste(Focal.ring, N1.mother, sep="_")))
+names(N_123_full)[2] <- "N1.MOTHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN1.mother <- DF.temp[,c(9,97)]
+DF$ring_ring <-(with(DF, paste(Focal.ring, N1.father, sep="_")))
+names(N_123_full)[2] <- "N1.FATHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN1.father<- DF.temp[,c(9,97)]
+
 
 #N2 
-DF.temp$boxes <-(with(DF.temp, paste(Box, N2, sep="_")))
-names(N3)[2] <- "N2.fp"
-DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N2.mother, sep="_")))
+#names(N_123_full)[2] <- "N2.MOTHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N2.father, sep="_")))
+#names(N_123_full)[2] <- "N2.FATHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
 
-#N3 
-DF.temp$boxes <-(with(DF.temp, paste(Box, N3, sep="_")))
-names(N3)[2] <- "N3.fp"
-DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+DF$ring_ring <-(with(DF, paste(Focal.ring, N2.mother, sep="_")))
+names(N_123_full)[2] <- "N2.MOTHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN2.mother <- DF.temp[,c(9,97)]
+DF$ring_ring <-(with(DF, paste(Focal.ring, N2.father, sep="_")))
+names(N_123_full)[2] <- "N2.FATHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN2.father<- DF.temp[,c(9,97)]
+
+#N3
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N3.mother, sep="_")))
+#names(N_123_full)[2] <- "N3.MOTHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N3.father, sep="_")))
+#names(N_123_full)[2] <- "N3.FATHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+
+DF$ring_ring <-(with(DF, paste(Focal.ring, N3.mother, sep="_")))
+names(N_123_full)[2] <- "N3.MOTHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN3.mother <- DF.temp[,c(9,97)]
+DF$ring_ring <-(with(DF, paste(Focal.ring, N3.father, sep="_")))
+names(N_123_full)[2] <- "N3.FATHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN3.father<- DF.temp[,c(9,97)]
 
 #N4 
-DF.temp$boxes <-(with(DF.temp, paste(Box, N4, sep="_")))
-names(N3)[2] <- "N4.fp"
-DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N4.mother, sep="_")))
+#names(N_123_full)[2] <- "N4.MOTHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N4.father, sep="_")))
+#names(N_123_full)[2] <- "N4.FATHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+
+DF$ring_ring <-(with(DF, paste(Focal.ring, N4.mother, sep="_")))
+names(N_123_full)[2] <- "N4.MOTHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN4.mother <- DF.temp[,c(9,97)]
+DF$ring_ring <-(with(DF, paste(Focal.ring, N4.father, sep="_")))
+names(N_123_full)[2] <- "N4.FATHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN4.father<- DF.temp[,c(9,97)]
 
 #N5 
-DF.temp$boxes <-(with(DF.temp, paste(Box, N5, sep="_")))
-names(N3)[2] <- "N5.fp"
-DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N5.mother, sep="_")))
+#names(N_123_full)[2] <- "N5.MOTHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N5.father, sep="_")))
+#names(N_123_full)[2] <- "N5.FATHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+
+DF$ring_ring <-(with(DF, paste(Focal.ring, N5.mother, sep="_")))
+names(N_123_full)[2] <- "N5.MOTHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN5.mother <- DF.temp[,c(9,97)]
+DF$ring_ring <-(with(DF, paste(Focal.ring, N5.father, sep="_")))
+names(N_123_full)[2] <- "N5.FATHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN5.father<- DF.temp[,c(9,97)]
 
 #N6 
-DF.temp$boxes <-(with(DF.temp, paste(Box, N6, sep="_")))
-names(N3)[2] <- "N6.fp"
-DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N6.mother, sep="_")))
+#names(N_123_full)[2] <- "N6.MOTHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N6.father, sep="_")))
+#names(N_123_full)[2] <- "N6.FATHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+
+DF$ring_ring <-(with(DF, paste(Focal.ring, N6.mother, sep="_")))
+names(N_123_full)[2] <- "N6.MOTHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN6.mother <- DF.temp[,c(9,97)]
+DF$ring_ring <-(with(DF, paste(Focal.ring, N6.father, sep="_")))
+names(N_123_full)[2] <- "N6.FATHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN6.father<- DF.temp[,c(9,97)]
 
 #N7 
-DF.temp$boxes <-(with(DF.temp, paste(Box, N7, sep="_")))
-names(N3)[2] <- "N7.fp"
-DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N7.mother, sep="_")))
+#names(N_123_full)[2] <- "N7.MOTHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N7.father, sep="_")))
+#names(N_123_full)[2] <- "N7.FATHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+
+DF$ring_ring <-(with(DF, paste(Focal.ring, N7.mother, sep="_")))
+names(N_123_full)[2] <- "N7.MOTHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN7.mother <- DF.temp[,c(9,97)]
+DF$ring_ring <-(with(DF, paste(Focal.ring, N7.father, sep="_")))
+names(N_123_full)[2] <- "N7.FATHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN7.father<- DF.temp[,c(9,97)]
 
 #N8 
-DF.temp$boxes <-(with(DF.temp, paste(Box, N8, sep="_")))
-names(N3)[2] <- "N8.fp"
-DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N8.mother, sep="_")))
+#names(N_123_full)[2] <- "N8.MOTHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N8.father, sep="_")))
+#names(N_123_full)[2] <- "N8.FATHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+
+DF$ring_ring <-(with(DF, paste(Focal.ring, N8.mother, sep="_")))
+names(N_123_full)[2] <- "N8.MOTHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN8.mother <- DF.temp[,c(9,97)]
+DF$ring_ring <-(with(DF, paste(Focal.ring, N8.father, sep="_")))
+names(N_123_full)[2] <- "N8.FATHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN8.father<- DF.temp[,c(9,97)]
 
 #N9 
-DF.temp$boxes <-(with(DF.temp, paste(Box, N9, sep="_")))
-names(N3)[2] <- "N9.fp"
-DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N9.mother, sep="_")))
+#names(N_123_full)[2] <- "N9.MOTHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N9.father, sep="_")))
+#names(N_123_full)[2] <- "N9.FATHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+
+DF$ring_ring <-(with(DF, paste(Focal.ring, N9.mother, sep="_")))
+names(N_123_full)[2] <- "N9.MOTHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN9.mother <- DF.temp[,c(9,97)]
+DF$ring_ring <-(with(DF, paste(Focal.ring, N9.father, sep="_")))
+names(N_123_full)[2] <- "N9.FATHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN9.father<- DF.temp[,c(9,97)]
 
 #N10 
-DF.temp$boxes <-(with(DF.temp, paste(Box, N10, sep="_")))
-names(N3)[2] <- "N10.fp"
-DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N10.mother, sep="_")))
+#names(N_123_full)[2] <- "N10.MOTHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+#DF.temp$ring_ring <-(with(DF.temp, paste(Focal.ring, N10.father, sep="_")))
+#names(N_123_full)[2] <- "N10.FATHERfp"
+#DF.temp <- merge(DF.temp, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+
+DF$ring_ring <-(with(DF, paste(Focal.ring, N10.mother, sep="_")))
+names(N_123_full)[2] <- "N10.MOTHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN10.mother <- DF.temp[,c(9,97)]
+DF$ring_ring <-(with(DF, paste(Focal.ring, N10.father, sep="_")))
+names(N_123_full)[2] <- "N10.FATHERfp"
+DF.temp <- merge(DF, N_123_full, by=c("ring_ring", "Year.s"), all.x=TRUE)
+CN10.father<- DF.temp[,c(9,97)]
 
 
-#label number of familiar neighbors 
-temp <- as.data.frame((is.na(DF.temp[,c("N1.fp","N2.fp","N3.fp","N4.fp","N5.fp","N6.fp","N7.fp","N8.fp","N9.fp","N10.fp")])))
+#ok let's try to put them together?
+
+CN1 <- merge(CN1.mother, CN1.father, by="Box.year.parentid")
+CN2 <- merge(CN2.mother, CN2.father, by="Box.year.parentid")
+CN3 <- merge(CN3.mother, CN3.father, by="Box.year.parentid")
+CN4 <- merge(CN4.mother, CN4.father, by="Box.year.parentid")
+CN5 <- merge(CN5.mother, CN5.father, by="Box.year.parentid")
+CN6 <- merge(CN6.mother, CN6.father, by="Box.year.parentid")
+CN7 <- merge(CN7.mother, CN7.father, by="Box.year.parentid")
+CN8 <- merge(CN8.mother, CN8.father, by="Box.year.parentid")
+CN9 <- merge(CN9.mother, CN9.father, by="Box.year.parentid")
+CN10 <- merge(CN10.mother, CN10.father, by="Box.year.parentid")
+
+x <- merge(CN1, CN2, by="Box.year.parentid")
+x <- merge(x, CN3, by="Box.year.parentid")
+x <- merge(x, CN4, by="Box.year.parentid")
+x <- merge(x, CN5, by="Box.year.parentid")
+x <- merge(x, CN6, by="Box.year.parentid")
+x <- merge(x, CN7, by="Box.year.parentid")
+x <- merge(x, CN8, by="Box.year.parentid")
+x <- merge(x, CN9, by="Box.year.parentid")
+x <- merge(x, CN10, by="Box.year.parentid")
+
+
+DF.temp <- merge(DF, x, by="Box.year.parentid", all.x=TRUE)
+
+
+DF.temp <- DF.temp[c(1:770),]
+test1 <- as.data.frame(order(DF.temp$Box.year.parentid))
+test2 <- as.data.frame(order(DF$Box.year.parentid))
+summary(arsenal::comparedf(test1, test2))
+
+#label number of familiar neighbors (individuals )
+temp <- as.data.frame((is.na(DF.temp[,c("N1.MOTHERfp","N1.FATHERfp","N2.MOTHERfp", "N2.FATHERfp", "N3.MOTHERfp","N3.FATHERfp","N4.MOTHERfp", "N4.FATHERfp", "N5.MOTHERfp", "N5.FATHERfp", "N6.MOTHERfp", "N6.FATHERfp", "N7.MOTHERfp","N7.FATHERfp","N8.MOTHERfp", "N8.FATHERfp", "N9.MOTHERfp" ,"N9.FATHERfp","N10.MOTHERfp", "N10.FATHERfp")])))
+library(dplyr)
+temp %>% mutate_if(is.logical,as.numeric) -> temp
+temp$sumna <- rowSums(temp)
+temp$N.num.familiar <- 20 - temp$sumna
+hist(temp$N.num.familiar)
+DF.temp$N.num.ind.familiar <- temp$N.num.familiar
+
+#familiarity to mothers 
+temp <- as.data.frame((is.na(DF.temp[,c("N1.MOTHERfp","N2.MOTHERfp", "N3.MOTHERfp","N4.MOTHERfp",  "N5.MOTHERfp",  "N6.MOTHERfp",  "N7.MOTHERfp","N8.MOTHERfp", "N9.MOTHERfp" ,"N10.MOTHERfp")])))
 library(dplyr)
 temp %>% mutate_if(is.logical,as.numeric) -> temp
 temp$sumna <- rowSums(temp)
 temp$N.num.familiar <- 10 - (temp$sumna)
+hist(temp$N.num.familiar)
+DF.temp$N.num.FEMALEind.familiar <- temp$N.num.familiar
 
-DF.temp$N.num.familiar <- temp$N.num.familiar
+#familiarity to father 
+temp <- as.data.frame((is.na(DF.temp[,c("N1.FATHERfp","N2.FATHERfp", "N3.FATHERfp","N4.FATHERfp",  "N5.FATHERfp",  "N6.FATHERfp",  "N7.FATHERfp","N8.FATHERfp", "N9.FATHERfp" ,"N10.FATHERfp")])))
+library(dplyr)
+temp %>% mutate_if(is.logical,as.numeric) -> temp
+temp$sumna <- rowSums(temp)
+temp$N.num.familiar <- 10 - (temp$sumna)
+hist(temp$N.num.familiar)
+DF.temp$N.num.MALEind.familiar <- temp$N.num.familiar
 
 
 #change NA to false
-DF.temp$N1.fp <- with(DF.temp, ifelse(is.na(N1.fp), FALSE, N1.fp)) 
-DF.temp$N2.fp <- with(DF.temp, ifelse(is.na(N2.fp), FALSE, N2.fp)) 
-DF.temp$N3.fp <- with(DF.temp, ifelse(is.na(N3.fp), FALSE, N3.fp)) 
-DF.temp$N4.fp <- with(DF.temp, ifelse(is.na(N4.fp), FALSE, N4.fp)) 
-DF.temp$N5.fp <- with(DF.temp, ifelse(is.na(N5.fp), FALSE, N5.fp)) 
-DF.temp$N6.fp <- with(DF.temp, ifelse(is.na(N6.fp), FALSE, N6.fp)) 
-DF.temp$N7.fp <- with(DF.temp, ifelse(is.na(N7.fp), FALSE, N7.fp)) 
-DF.temp$N8.fp <- with(DF.temp, ifelse(is.na(N8.fp), FALSE, N8.fp)) 
-DF.temp$N9.fp <- with(DF.temp, ifelse(is.na(N9.fp), FALSE, N9.fp)) 
-DF.temp$N10.fp <- with(DF.temp, ifelse(is.na(N10.fp), FALSE, N10.fp)) 
+DF.temp$N1.MOTHERfp <- with(DF.temp, ifelse(is.na(N1.MOTHERfp), FALSE, N1.MOTHERfp))
+DF.temp$N2.MOTHERfp <- with(DF.temp, ifelse(is.na(N2.MOTHERfp), FALSE, N2.MOTHERfp)) 
+DF.temp$N3.MOTHERfp <- with(DF.temp, ifelse(is.na(N3.MOTHERfp), FALSE, N3.MOTHERfp)) 
+DF.temp$N4.MOTHERfp <- with(DF.temp, ifelse(is.na(N4.MOTHERfp), FALSE, N4.MOTHERfp)) 
+DF.temp$N5.MOTHERfp <- with(DF.temp, ifelse(is.na(N5.MOTHERfp), FALSE, N5.MOTHERfp)) 
+DF.temp$N6.MOTHERfp <- with(DF.temp, ifelse(is.na(N6.MOTHERfp), FALSE, N6.MOTHERfp)) 
+DF.temp$N7.MOTHERfp <- with(DF.temp, ifelse(is.na(N7.MOTHERfp), FALSE, N7.MOTHERfp)) 
+DF.temp$N8.MOTHERfp <- with(DF.temp, ifelse(is.na(N8.MOTHERfp), FALSE, N8.MOTHERfp)) 
+DF.temp$N9.MOTHERfp <- with(DF.temp, ifelse(is.na(N9.MOTHERfp), FALSE, N9.MOTHERfp)) 
+DF.temp$N10.MOTHERfp <- with(DF.temp, ifelse(is.na(N10.MOTHERfp), FALSE, N10.MOTHERfp)) 
 
+DF.temp$N1.FATHERfp <- with(DF.temp, ifelse(is.na(N1.FATHERfp), FALSE, N1.FATHERfp))
+DF.temp$N2.FATHERfp <- with(DF.temp, ifelse(is.na(N2.FATHERfp), FALSE, N2.FATHERfp)) 
+DF.temp$N3.FATHERfp <- with(DF.temp, ifelse(is.na(N3.FATHERfp), FALSE, N3.FATHERfp)) 
+DF.temp$N4.FATHERfp <- with(DF.temp, ifelse(is.na(N4.FATHERfp), FALSE, N4.FATHERfp)) 
+DF.temp$N5.FATHERfp <- with(DF.temp, ifelse(is.na(N5.FATHERfp), FALSE, N5.FATHERfp)) 
+DF.temp$N6.FATHERfp <- with(DF.temp, ifelse(is.na(N6.FATHERfp), FALSE, N6.FATHERfp)) 
+DF.temp$N7.FATHERfp <- with(DF.temp, ifelse(is.na(N7.FATHERfp), FALSE, N7.FATHERfp)) 
+DF.temp$N8.FATHERfp <- with(DF.temp, ifelse(is.na(N8.FATHERfp), FALSE, N8.FATHERfp)) 
+DF.temp$N9.FATHERfp <- with(DF.temp, ifelse(is.na(N9.FATHERfp), FALSE, N9.FATHERfp)) 
+DF.temp$N10.FATHERfp <- with(DF.temp, ifelse(is.na(N10.FATHERfp), FALSE, N10.FATHERfp)) 
 
 DF.temp$boxes <- NULL
 
 DF <- DF.temp
+
+library(tidyverse)
+DF <- DF %>% rename_with(str_to_title)
 
 setwd("~/Documents/2/Familiar_neighbors/familiarneighbor/Data")
 saveRDS(DF, "CleanData2.rds")
