@@ -800,3 +800,511 @@ saveRDS(zz2012, "fnbasedata_2012.Rda")
 saveRDS(zz2013, "fnbasedata_2013.Rda")
 saveRDS(zz2014, "fnbasedata_2014.Rda")
 
+
+#####using clean data from greg as base
+####adding familiarity based on previous years #### 
+rm(list=ls())
+
+setwd("~/Documents/2/Familiar_neighbors/DATA")
+library(sf)
+
+#load data 
+load("Data Package A - Social Network Data For Samin(1).RData")
+load("Data Package B - Spatial Data For Samin(corrected).RData")
+
+#load in data
+raw.breeding.data <- read.csv("BREEDINGDATA.csv")
+nestbox.data <- read.csv("Nestboxes.csv")
+wood.outline <- sf::st_read("perimeter poly with clearings_region.shp")
+wood.outline <- wood.outline[1,] #keep first polygon
+
+#add box locations to breeding data
+box.locations <- nestbox.data[,c(2,3,4)]
+breeding.data <- raw.breeding.data[which(raw.breeding.data$year > 1964),] 
+
+breeding.data$Pnum <- as.character(breeding.data$Pnum)
+breeding.data$temp <- gsub("^.{0,4}", "", breeding.data$Pnum)  
+breeding.data$attempt <- substr(breeding.data$"temp",1,1) #label attempt number
+breeding.data <- breeding.data[which(breeding.data$attempt==1),] #remove the ones that are second attempts
+breeding.data$Box <- gsub("^.{1,1}", "", breeding.data$temp) #get box number in right format 
+breeding.data <- dplyr::left_join(breeding.data, box.locations, by="Box") #add box locations 
+
+#get a base with great tits only to work with 
+xdata <- breeding.data[which(breeding.data$Species=="g"),]
+
+#get the neighbors from 2011 ####
+xdata2011 <- xdata[which(xdata$year == 2011),]
+
+
+
+xdata2011 <- xdata2011[!is.na(xdata2011$x), ] #can get this info somehow? for now removing the 10 without coords
+
+#converting it into a spatial object
+xdata2011 <- sf::st_as_sf(xdata2011, coords=c("x","y"), remove=F, crs=27700)
+
+#calculating a bounding box for the function that calculates the territory polygons
+
+bbox_polygon <- function(x) {
+  bb <- sf::st_bbox(x)
+  
+  p <- matrix(
+    c(bb["xmin"], bb["ymin"], 
+      bb["xmin"], bb["ymax"],
+      bb["xmax"], bb["ymax"], 
+      bb["xmax"], bb["ymin"], 
+      bb["xmin"], bb["ymin"]),
+    ncol = 2, byrow = T
+  )
+  
+  sf::st_polygon(list(p))
+}
+
+box <- sf::st_sfc(bbox_polygon(xdata2011))
+
+territories <- sf::st_voronoi(sf::st_union(xdata2011), box)
+territories <- sf::st_intersection(sf::st_cast(territories), sf::st_union(wood.outline))
+
+plot(territories)
+
+#joining the territory polygons back up with the individuals that bred in them
+data.frame(colnames(xdata2011))
+xdata2011 <- xdata2011[,c(57,37,38)]
+
+territories <- sf::st_sf(geom = territories)
+territories <- sf::st_join(territories, xdata2011)
+
+#now we want to figure out who was in the neighbouring territories for each box
+territories.list <- st_intersection(territories, territories)
+
+#this includes the box itself when making the comparisons so we'll remove those
+territories.list <- subset(territories.list, Box.1 != Box)
+
+#removing the geometry column as we don't need that anymore
+st_geometry(territories.list) <- NULL
+
+#we'll remove cases where the identities of neighbours were unknown 
+#(presumably because they weren't caught or it failed before they were)
+
+
+#fill in empty spaces with NA
+territories.list$Mother <- as.character(territories.list$Mother)
+territories.list$Mother <- with(territories.list, ifelse(Mother=="", NA, 
+                                                         territories.list$Mother)) #label one ID
+
+territories.list$Father <- as.character(territories.list$Father)
+territories.list$Father <- with(territories.list, ifelse(Father=="", NA, 
+                                                         territories.list$Father)) #label one ID
+
+territories.list$Mother.1 <- as.character(territories.list$Mother.1)
+territories.list$Mother.1 <- with(territories.list, ifelse(Mother.1=="", NA, 
+                                                           territories.list$Mother.1)) #label one ID
+
+territories.list$Father.1 <- as.character(territories.list$Father.1)
+territories.list$Father.1 <- with(territories.list, ifelse(Father.1=="", NA, 
+                                                           territories.list$Father.1)) #label one ID
+
+territories.list <- subset(territories.list, !is.na(Father) | !is.na(Mother))
+
+#we also want to do the same if the focal nest box had no ID information
+territories.list <- subset(territories.list, !is.na(Father.1) | !is.na(Mother.1))
+
+#now just getting the dataframe into a nice order with informative column names
+
+territories.list <- territories.list[,c(4,5,6,1,2,3)]
+
+colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighbouring.male", "Neighbouring.female")
+
+neighbors.2011 <- territories.list  
+
+#get the neighbors from 2012 ####
+xdata2012 <- xdata[which(xdata$year == 2012),]
+
+
+
+xdata2012 <- xdata2012[!is.na(xdata2012$x), ] #can get this info somehow? for now removing the 10 without coords
+
+#converting it into a spatial object
+xdata2012 <- sf::st_as_sf(xdata2012, coords=c("x","y"), remove=F, crs=27700)
+
+#calculating a bounding box for the function that calculates the territory polygons
+
+bbox_polygon <- function(x) {
+  bb <- sf::st_bbox(x)
+  
+  p <- matrix(
+    c(bb["xmin"], bb["ymin"], 
+      bb["xmin"], bb["ymax"],
+      bb["xmax"], bb["ymax"], 
+      bb["xmax"], bb["ymin"], 
+      bb["xmin"], bb["ymin"]),
+    ncol = 2, byrow = T
+  )
+  
+  sf::st_polygon(list(p))
+}
+
+box <- sf::st_sfc(bbox_polygon(xdata2012))
+
+territories <- sf::st_voronoi(sf::st_union(xdata2012), box)
+territories <- sf::st_intersection(sf::st_cast(territories), sf::st_union(wood.outline))
+
+plot(territories)
+
+#joining the territory polygons back up with the individuals that bred in them
+data.frame(colnames(xdata2012))
+xdata2012 <- xdata2012[,c(57,37,38)]
+
+territories <- sf::st_sf(geom = territories)
+territories <- sf::st_join(territories, xdata2012)
+
+#now we want to figure out who was in the neighbouring territories for each box
+territories.list <- st_intersection(territories, territories)
+
+#this includes the box itself when making the comparisons so we'll remove those
+territories.list <- subset(territories.list, Box.1 != Box)
+
+#removing the geometry column as we don't need that anymore
+st_geometry(territories.list) <- NULL
+
+#we'll remove cases where the identities of neighbours were unknown 
+#(presumably because they weren't caught or it failed before they were)
+
+
+#fill in empty spaces with NA
+territories.list$Mother <- as.character(territories.list$Mother)
+territories.list$Mother <- with(territories.list, ifelse(Mother=="", NA, 
+                                                         territories.list$Mother)) #label one ID
+
+territories.list$Father <- as.character(territories.list$Father)
+territories.list$Father <- with(territories.list, ifelse(Father=="", NA, 
+                                                         territories.list$Father)) #label one ID
+
+territories.list$Mother.1 <- as.character(territories.list$Mother.1)
+territories.list$Mother.1 <- with(territories.list, ifelse(Mother.1=="", NA, 
+                                                           territories.list$Mother.1)) #label one ID
+
+territories.list$Father.1 <- as.character(territories.list$Father.1)
+territories.list$Father.1 <- with(territories.list, ifelse(Father.1=="", NA, 
+                                                           territories.list$Father.1)) #label one ID
+
+territories.list <- subset(territories.list, !is.na(Father) | !is.na(Mother))
+
+#we also want to do the same if the focal nest box had no ID information
+territories.list <- subset(territories.list, !is.na(Father.1) | !is.na(Mother.1))
+
+#now just getting the dataframe into a nice order with informative column names
+
+territories.list <- territories.list[,c(4,5,6,1,2,3)]
+
+colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighbouring.male", "Neighbouring.female")
+
+neighbors.2012 <- territories.list   
+
+#get the neighbors from 2013 ####
+xdata2013 <- xdata[which(xdata$year == 2013),]
+
+
+
+xdata2013 <- xdata2013[!is.na(xdata2013$x), ] #can get this info somehow? for now removing the 10 without coords
+
+#converting it into a spatial object
+xdata2013 <- sf::st_as_sf(xdata2013, coords=c("x","y"), remove=F, crs=27700)
+
+#calculating a bounding box for the function that calculates the territory polygons
+
+bbox_polygon <- function(x) {
+  bb <- sf::st_bbox(x)
+  
+  p <- matrix(
+    c(bb["xmin"], bb["ymin"], 
+      bb["xmin"], bb["ymax"],
+      bb["xmax"], bb["ymax"], 
+      bb["xmax"], bb["ymin"], 
+      bb["xmin"], bb["ymin"]),
+    ncol = 2, byrow = T
+  )
+  
+  sf::st_polygon(list(p))
+}
+
+box <- sf::st_sfc(bbox_polygon(xdata2013))
+
+territories <- sf::st_voronoi(sf::st_union(xdata2013), box)
+territories <- sf::st_intersection(sf::st_cast(territories), sf::st_union(wood.outline))
+
+plot(territories)
+
+#joining the territory polygons back up with the individuals that bred in them
+data.frame(colnames(xdata2013))
+xdata2013 <- xdata2013[,c(57,37,38)]
+
+territories <- sf::st_sf(geom = territories)
+territories <- sf::st_join(territories, xdata2013)
+
+#now we want to figure out who was in the neighbouring territories for each box
+territories.list <- st_intersection(territories, territories)
+
+#this includes the box itself when making the comparisons so we'll remove those
+territories.list <- subset(territories.list, Box.1 != Box)
+
+#removing the geometry column as we don't need that anymore
+st_geometry(territories.list) <- NULL
+
+#we'll remove cases where the identities of neighbours were unknown 
+#(presumably because they weren't caught or it failed before they were)
+
+
+#fill in empty spaces with NA
+territories.list$Mother <- as.character(territories.list$Mother)
+territories.list$Mother <- with(territories.list, ifelse(Mother=="", NA, 
+                                                         territories.list$Mother)) #label one ID
+
+territories.list$Father <- as.character(territories.list$Father)
+territories.list$Father <- with(territories.list, ifelse(Father=="", NA, 
+                                                         territories.list$Father)) #label one ID
+
+territories.list$Mother.1 <- as.character(territories.list$Mother.1)
+territories.list$Mother.1 <- with(territories.list, ifelse(Mother.1=="", NA, 
+                                                           territories.list$Mother.1)) #label one ID
+
+territories.list$Father.1 <- as.character(territories.list$Father.1)
+territories.list$Father.1 <- with(territories.list, ifelse(Father.1=="", NA, 
+                                                           territories.list$Father.1)) #label one ID
+
+territories.list <- subset(territories.list, !is.na(Father) | !is.na(Mother))
+
+#we also want to do the same if the focal nest box had no ID information
+territories.list <- subset(territories.list, !is.na(Father.1) | !is.na(Mother.1))
+
+#now just getting the dataframe into a nice order with informative column names
+
+territories.list <- territories.list[,c(4,5,6,1,2,3)]
+
+colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighbouring.male", "Neighbouring.female")
+
+neighbors.2013 <- territories.list  
+
+#get the neighbors from 2014 ####
+xdata2014 <- xdata[which(xdata$year == 2014),]
+
+
+
+xdata2014 <- xdata2014[!is.na(xdata2014$x), ] #can get this info somehow? for now removing the 10 without coords
+
+#converting it into a spatial object
+xdata2014 <- sf::st_as_sf(xdata2014, coords=c("x","y"), remove=F, crs=27700)
+
+#calculating a bounding box for the function that calculates the territory polygons
+
+bbox_polygon <- function(x) {
+  bb <- sf::st_bbox(x)
+  
+  p <- matrix(
+    c(bb["xmin"], bb["ymin"], 
+      bb["xmin"], bb["ymax"],
+      bb["xmax"], bb["ymax"], 
+      bb["xmax"], bb["ymin"], 
+      bb["xmin"], bb["ymin"]),
+    ncol = 2, byrow = T
+  )
+  
+  sf::st_polygon(list(p))
+}
+
+box <- sf::st_sfc(bbox_polygon(xdata2014))
+
+territories <- sf::st_voronoi(sf::st_union(xdata2014), box)
+territories <- sf::st_intersection(sf::st_cast(territories), sf::st_union(wood.outline))
+
+plot(territories)
+
+#joining the territory polygons back up with the individuals that bred in them
+data.frame(colnames(xdata2014))
+xdata2014 <- xdata2014[,c(57,37,38)]
+
+territories <- sf::st_sf(geom = territories)
+territories <- sf::st_join(territories, xdata2014)
+
+#now we want to figure out who was in the neighbouring territories for each box
+territories.list <- st_intersection(territories, territories)
+
+#this includes the box itself when making the comparisons so we'll remove those
+territories.list <- subset(territories.list, Box.1 != Box)
+
+#removing the geometry column as we don't need that anymore
+st_geometry(territories.list) <- NULL
+
+#we'll remove cases where the identities of neighbours were unknown 
+#(presumably because they weren't caught or it failed before they were)
+
+
+#fill in empty spaces with NA
+territories.list$Mother <- as.character(territories.list$Mother)
+territories.list$Mother <- with(territories.list, ifelse(Mother=="", NA, 
+                                                         territories.list$Mother)) #label one ID
+
+territories.list$Father <- as.character(territories.list$Father)
+territories.list$Father <- with(territories.list, ifelse(Father=="", NA, 
+                                                         territories.list$Father)) #label one ID
+
+territories.list$Mother.1 <- as.character(territories.list$Mother.1)
+territories.list$Mother.1 <- with(territories.list, ifelse(Mother.1=="", NA, 
+                                                           territories.list$Mother.1)) #label one ID
+
+territories.list$Father.1 <- as.character(territories.list$Father.1)
+territories.list$Father.1 <- with(territories.list, ifelse(Father.1=="", NA, 
+                                                           territories.list$Father.1)) #label one ID
+
+territories.list <- subset(territories.list, !is.na(Father) | !is.na(Mother))
+
+#we also want to do the same if the focal nest box had no ID information
+territories.list <- subset(territories.list, !is.na(Father.1) | !is.na(Mother.1))
+
+#now just getting the dataframe into a nice order with informative column names
+
+territories.list <- territories.list[,c(4,5,6,1,2,3)]
+
+colnames(territories.list) <- c("Focal.box", "Focal.male", "Focal.female", "Box.N", "Neighbouring.male", "Neighbouring.female")
+
+neighbors.2014 <- territories.list  
+
+
+#### get data to merge with 
+setwd("~/Documents/2/Familiar_neighbors/familiarneighbor/Data")
+DF <- readRDS("CleanData.rds")
+DF$Binary.succ <- DF$Num.fledglings
+DF$Binary.succ <- with(DF, ifelse(Binary.succ == 0, "0", 
+                                  DF$Binary.succ)) 
+DF$Binary.succ <- with(DF, ifelse(Binary.succ > 0, "1", 
+                                  DF$Binary.succ)) 
+
+DF$Binary.succ <- as.numeric(DF$Binary.succ)
+
+#neighbor stuff 
+DF$N.full.avgbs <- rowMeans(DF[,c("N1.fbs", "N1.mbs","N2.fbs", "N2.mbs","N3.fbs", "N3.mbs","N4.fbs", "N4.mbs", 
+                                  "N5.fbs", "N5.mbs", "N6.fbs", "N6.mbs", "N7.fbs", "N7.mbs", "N8.fbs", "N8.mbs", 
+                                  "N9.fbs", "N9.mbs", "N10.fbs", "N10.mbs")], na.rm=TRUE)
+
+DF$N.female.avgbs <- rowMeans(DF[,c("N1.mbs","N2.mbs","N3.mbs", "N4.mbs", 
+                                    "N5.mbs", "N6.mbs","N7.mbs", "N8.mbs", 
+                                    "N9.mbs", "N10.mbs")], na.rm=TRUE)
+
+DF$N.male.avgbs <- rowMeans(DF[,c("N1.fbs","N2.fbs","N3.fbs", "N4.fbs", 
+                                  "N5.fbs", "N6.fbs","N7.fbs", "N8.fbs", 
+                                  "N9.fbs", "N10.fbs")], na.rm=TRUE)
+
+temp <- as.data.frame((is.na(DF[,c("N1","N2","N3","N4","N5","N6","N7","N8","N9","N10")])))
+library(dplyr)
+temp %>% mutate_if(is.logical,as.numeric) -> temp
+temp$sumna <- rowSums(temp)
+temp$N.num <- 10 - (temp$sumna)
+
+DF$N.num <- temp$N.num
+
+
+#make a column with neighbor pairs, year, and "true" 
+N2011 <- as.data.frame(with(neighbors.2011, paste(Focal.box, Box.N, sep="_")))
+names(N2011)[1] <- "boxes"
+N2011$neighbors <- TRUE
+N2011$Year.s <- 2012
+
+N2012 <- as.data.frame(with(neighbors.2012, paste(Focal.box, Box.N, sep="_")))
+names(N2012)[1] <- "boxes"
+N2012$neighbors <- TRUE
+N2012$Year.s <- 2013
+
+N2013 <- as.data.frame(with(neighbors.2013, paste(Focal.box, Box.N, sep="_")))
+names(N2013)[1] <- "boxes"
+N2013$neighbors <- TRUE
+N2013$Year.s <- 2014
+
+N3 <- rbind(N2011, N2012, N2013)
+
+#each neighbor at a time
+#N1 
+DF$boxes <-(with(DF, paste(Box, N1, sep="_")))
+names(N3)[2] <- "N1.fp"
+DF.temp <- merge(DF, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+
+#N2 
+DF.temp$boxes <-(with(DF.temp, paste(Box, N2, sep="_")))
+names(N3)[2] <- "N2.fp"
+DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+
+#N3 
+DF.temp$boxes <-(with(DF.temp, paste(Box, N3, sep="_")))
+names(N3)[2] <- "N3.fp"
+DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+
+#N4 
+DF.temp$boxes <-(with(DF.temp, paste(Box, N4, sep="_")))
+names(N3)[2] <- "N4.fp"
+DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+
+#N5 
+DF.temp$boxes <-(with(DF.temp, paste(Box, N5, sep="_")))
+names(N3)[2] <- "N5.fp"
+DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+
+#N6 
+DF.temp$boxes <-(with(DF.temp, paste(Box, N6, sep="_")))
+names(N3)[2] <- "N6.fp"
+DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+
+#N7 
+DF.temp$boxes <-(with(DF.temp, paste(Box, N7, sep="_")))
+names(N3)[2] <- "N7.fp"
+DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+
+#N8 
+DF.temp$boxes <-(with(DF.temp, paste(Box, N8, sep="_")))
+names(N3)[2] <- "N8.fp"
+DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+
+#N9 
+DF.temp$boxes <-(with(DF.temp, paste(Box, N9, sep="_")))
+names(N3)[2] <- "N9.fp"
+DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+
+#N10 
+DF.temp$boxes <-(with(DF.temp, paste(Box, N10, sep="_")))
+names(N3)[2] <- "N10.fp"
+DF.temp <- merge(DF.temp, N3, by=c("boxes", "Year.s"), all.x=TRUE)
+
+
+#label number of familiar neighbors 
+temp <- as.data.frame((is.na(DF.temp[,c("N1.fp","N2.fp","N3.fp","N4.fp","N5.fp","N6.fp","N7.fp","N8.fp","N9.fp","N10.fp")])))
+library(dplyr)
+temp %>% mutate_if(is.logical,as.numeric) -> temp
+temp$sumna <- rowSums(temp)
+temp$N.num.familiar <- 10 - (temp$sumna)
+
+DF.temp$N.num.familiar <- temp$N.num.familiar
+
+
+#change NA to false
+DF.temp$N1.fp <- with(DF.temp, ifelse(is.na(N1.fp), FALSE, N1.fp)) 
+DF.temp$N2.fp <- with(DF.temp, ifelse(is.na(N2.fp), FALSE, N2.fp)) 
+DF.temp$N3.fp <- with(DF.temp, ifelse(is.na(N3.fp), FALSE, N3.fp)) 
+DF.temp$N4.fp <- with(DF.temp, ifelse(is.na(N4.fp), FALSE, N4.fp)) 
+DF.temp$N5.fp <- with(DF.temp, ifelse(is.na(N5.fp), FALSE, N5.fp)) 
+DF.temp$N6.fp <- with(DF.temp, ifelse(is.na(N6.fp), FALSE, N6.fp)) 
+DF.temp$N7.fp <- with(DF.temp, ifelse(is.na(N7.fp), FALSE, N7.fp)) 
+DF.temp$N8.fp <- with(DF.temp, ifelse(is.na(N8.fp), FALSE, N8.fp)) 
+DF.temp$N9.fp <- with(DF.temp, ifelse(is.na(N9.fp), FALSE, N9.fp)) 
+DF.temp$N10.fp <- with(DF.temp, ifelse(is.na(N10.fp), FALSE, N10.fp)) 
+
+
+DF.temp$boxes <- NULL
+
+DF <- DF.temp
+
+setwd("~/Documents/2/Familiar_neighbors/familiarneighbor/Data")
+saveRDS(DF, "CleanData2.rds")
+
+
+
+
+
+
+
