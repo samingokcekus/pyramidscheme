@@ -10861,6 +10861,11 @@ DF.temp$N10.FATHERfp <- with(DF.temp, ifelse(is.na(N10.FATHERfp), FALSE, N10.FAT
 
 fn.data <- DF.temp
 
+setwd("~/Documents/2/Familiar_neighbors/DATA")
+saveRDS(fn.data, "fn.data.noage.Rds")
+
+#setwd("~/Documents/2/Familiar_neighbors/DATA")
+#fn.data <- readRDS("fn.data.noage.Rds")
 
 #add the ages also 
 agedata <- read.csv("GRETI_Age_Data.csv")
@@ -10874,19 +10879,23 @@ agedata$Age <- with(agedata, ifelse(Age < 2, "juvenile", agedata$Age))
 agedata <- agedata[,c(1,2,5)]
 names(agedata)[1] <- "focal.ring"
 names(agedata)[2] <- "year"
-agedata <-data.frame(agedata,"ring.year"=paste(agedata$focal.ring, agedata$year,sep="_")) 
+agedata <- data.frame(agedata,"ring.year"=paste(agedata$focal.ring, agedata$year,sep="_")) 
 agedata <- agedata[!duplicated(agedata[,"ring.year"]),]
 agedata$ring.year <- NULL
-fn.data.temp <- merge(fn.data, agedata, by=c("focal.ring", "year"), all.x=TRUE)
 
-colnames(fn.data.temp) <- stringr::str_to_title(colnames(fn.data.temp))
+fn.data$focal.ring <- toupper(fn.data$focal.ring)
+
+fn.data.temp <- merge(fn.data, agedata, by=c("focal.ring", "year"), all.x=TRUE)
 
 #remove the juveniles and NA 
 summary(as.factor(fn.data.temp$Age))
+table(fn.data.temp$Age, fn.data.temp$year)
 fn.data <- fn.data.temp[which(fn.data.temp$Age=="adult"),]
+
+#uppercase column names 
+colnames(fn.data) <- stringr::str_to_title(colnames(fn.data))
 
 setwd("~/Documents/2/Familiar_neighbors/DATA")
 saveRDS(fn.data, "fn.data.Rds")
-
 
 
