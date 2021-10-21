@@ -14,7 +14,7 @@ Resps <- c("April.lay.date",
            "Mean.chick.weight",
            "Num.fledglings")
 
-SocialCovar <- c("Strength_Mean", "Degree", #social 
+SocialCovar <- c("Strength_mean", "Degree", #social 
                  "Bondstrength", #pair bond
                  "N.avg.bs", "N.avg.female.bs", "N.avg.male.bs", #neighbors
                  "Spatial.assoc") #spatial 
@@ -33,7 +33,7 @@ ClashList <- list(
   DensityCovar
   )
 
-Covar <- c("Age_num", "Year.w")
+Covar <- c("Age_num", "Year.w", "Largeoaks")
 
 r <- 1
 
@@ -43,7 +43,7 @@ Resps %<>% sort
 
 ####FEMALE####
 
-DF <- DF_all[which(DF_all$Focal.sex == "F")]
+DF <- DF_all[which(DF_all$Focal.sex == "F"),]
 
 for(r in r:length(Resps)){
   
@@ -108,18 +108,18 @@ for(r in r:length(Resps)){
 
 IMListF <- IMList
 
-IMList %>% map("FinalModel") %>% 
-  Efxplot(ModelNames = Resps, PointOutline = T) +
+female <- IMListF %>% map("FinalModel") %>% 
+  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F) +
   scale_colour_brewer(palette = "Spectral") +
-  IMList %>% map(c("Spatial", "Model")) %>% 
-  Efxplot(ModelNames = Resps, PointOutline = T) +
+  IMListF %>% map(c("Spatial", "Model")) %>% 
+  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F) +
   scale_colour_brewer(palette = "Spectral") +
   plot_layout(guides = "collect")
 
-IMList %>% map(~list(.x$FinalModel, .x$Spatial$Model) %>% INLADICFig) %>% ArrangeCowplot()
+IMListF %>% map(~list(.x$FinalModel, .x$Spatial$Model) %>% INLADICFig) %>% ArrangeCowplot()
 
-IMList %>% names %>% 
-  map(~ggField(IMList[[.x]]$Spatial$Model, IMList[[.x]]$Spatial$Mesh) + 
+IMListF %>% names %>% 
+  map(~ggField(IMListF[[.x]]$Spatial$Model, IMListF[[.x]]$Spatial$Mesh) + 
         labs(fill = .x) +
         scale_fill_discrete_sequential(palette = "Mint")) %>% 
   ArrangeCowplot() + 
@@ -127,7 +127,7 @@ IMList %>% names %>%
 
 ###MALE####
 
-DF <- DF_all[which(DF_all$Focal.sex == "M")]
+DF <- DF_all[which(DF_all$Focal.sex == "M"),]
 
 for(r in r:length(Resps)){
   
@@ -193,18 +193,18 @@ for(r in r:length(Resps)){
 IMListM <- IMList
 
 
-IMList %>% map("FinalModel") %>% 
-  Efxplot(ModelNames = Resps, PointOutline = T) +
+male <- IMListM %>% map("FinalModel") %>% 
+  Efxplot(ModelNames = Resps, PointOutline = T, Intercept=F) +
   scale_colour_brewer(palette = "Spectral") +
-  IMList %>% map(c("Spatial", "Model")) %>% 
-  Efxplot(ModelNames = Resps, PointOutline = T) +
+  IMListM %>% map(c("Spatial", "Model")) %>% 
+  Efxplot(ModelNames = Resps, PointOutline = T, Intercept=F) +
   scale_colour_brewer(palette = "Spectral") +
   plot_layout(guides = "collect")
 
-IMList %>% map(~list(.x$FinalModel, .x$Spatial$Model) %>% INLADICFig) %>% ArrangeCowplot()
+IMListM %>% map(~list(.x$FinalModel, .x$Spatial$Model) %>% INLADICFig) %>% ArrangeCowplot()
 
-IMList %>% names %>% 
-  map(~ggField(IMList[[.x]]$Spatial$Model, IMList[[.x]]$Spatial$Mesh) + 
+IMListM %>% names %>% 
+  map(~ggField(IMListM[[.x]]$Spatial$Model, IMListM[[.x]]$Spatial$Mesh) + 
         labs(fill = .x) +
         scale_fill_discrete_sequential(palette = "Mint")) %>% 
   ArrangeCowplot() + 
