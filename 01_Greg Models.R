@@ -8,24 +8,16 @@ theme_set(theme_cowplot())
 
 DF <- readRDS("Data/CleanData.rds")
 
-# DF$Num.fledglings %>% qplot
-
-Resps <- c("April.hatch.date",
-           "April.lay.date",
+Resps <- c("April.lay.date",
+           "Binary.succ",
            "Clutch.size",
-           "Incubation.duration",
-           # "Incubation.started",
-           # "Laying.rate",
            "Mean.chick.weight",
-           "Num.chicks",
-           # "Num.dead.chicks",
-           # "Num.eggs.weighed",
-           "Num.fledglings", 
-           "Total.egg.weight")
+           "Num.fledglings")
 
-SocialCovar <- c("Degree", "BondStrength", "Betweenness", "Eigenvector",
-                 #"Strength", "Strength_Mean", 
-                 "Clustering")
+SocialCovar <- c("Strength_Mean", "Degree", #social 
+                 "Bondstrength", #pair bond
+                 "N.avg.bs", "N.avg.female.bs", "N.avg.male.bs", #neighbors
+                 "Spatial.assoc") #spatial 
 
 DensityCovar <- c("LifetimeDensity", "AnnualDensity")
 
@@ -37,7 +29,7 @@ DensityCovar <- c("LifetimeDensity", "AnnualDensity")
 #   ggpairs()
 
 ClashList <- list(
-  c(SocialCovar[c(1, 3:5)]),
+  c(SocialCovar[c(4:6)]),
   DensityCovar
   )
 
