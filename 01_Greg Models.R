@@ -2,11 +2,11 @@
 # 0_Greg Script ####
 
 library(tidyverse); library(magrittr); library(ggregplot); library(cowplot); library(colorspace)
-library(GGally); library(patchwork); library(dplyr)
+library(GGally); library(patchwork); library(dplyr); library(beepr)
 
 theme_set(theme_cowplot())
 
-DF <- readRDS("Data/CleanData.rds")
+DF_all <- readRDS("Data/CleanData.rds")
 
 Resps <- c("April.lay.date",
            "Binary.succ",
@@ -33,13 +33,17 @@ ClashList <- list(
   DensityCovar
   )
 
-Covar <- c("Focal.age", "Focal.sex", "Year.w")
+Covar <- c("Age_num", "Year.w")
 
 r <- 1
 
 IMList <- list()
 
 Resps %<>% sort
+
+####FEMALE####
+
+DF <- DF_all[which(DF_all$Focal.sex == "F")]
 
 for(r in r:length(Resps)){
   
@@ -49,7 +53,17 @@ for(r in r:length(Resps)){
     
     TestDF <- DF %>% dplyr::select(all_of(Covar), Focal.ring, Resps[r], X, Y) %>% na.omit
     
-    IM1 <- INLAModelAdd(Data = TestDF, Response = Resps[r], 
+    if(Resps[r] == "April.lay.date"){
+      
+      TestDF %<>% 
+        filter(April.lay.date < 55)
+      
+    }
+    
+    print("Female!") 
+    
+    IM1 <- INLAModelAdd(Data = TestDF,
+                        Response = Resps[r], 
                         Explanatory = Covar, 
                         Add = "f(Focal.ring, model = 'iid')",
                         # Random = "Focal.ring", RandomModel = "iid", 
@@ -92,6 +106,8 @@ for(r in r:length(Resps)){
   
 }
 
+IMListF <- IMList
+
 IMList %>% map("FinalModel") %>% 
   Efxplot(ModelNames = Resps, PointOutline = T) +
   scale_colour_brewer(palette = "Spectral") +
@@ -108,6 +124,98 @@ IMList %>% names %>%
         scale_fill_discrete_sequential(palette = "Mint")) %>% 
   ArrangeCowplot() + 
   ggsave("Fields.jpeg", units = "mm", width = 400, height = 300)
+
+###MALE####
+
+DF <- DF_all[which(DF_all$Focal.sex == "M")]
+
+for(r in r:length(Resps)){
+  
+  print(Resps[r])
+  
+  if(0){
+    
+    TestDF <- DF %>% dplyr::select(all_of(Covar), Focal.ring, Resps[r], X, Y) %>% na.omit
+    
+    if(Resps[r] == "April.lay.date"){
+      
+      TestDF %<>% 
+        filter(April.lay.date < 55)
+      
+    }
+    
+    print("Male!") 
+    
+    IM1 <- INLAModelAdd(Data = TestDF,
+                        Response = Resps[r], 
+                        Explanatory = Covar, 
+                        Add = "f(Focal.ring, model = 'iid')",
+                        # Random = "Focal.ring", RandomModel = "iid", 
+                        AddSpatial = T)
+    
+    IMList[[Resps[r]]]$Base <- IM1
+    
+    IM1$FinalModel %>% list(IM1$Spatial$Model) %>% INLADICFig()
+    
+    IM1$Spatial$Model %>% ggField(
+      Mesh = IM1$Spatial$Mesh
+      
+    ) + scale_fill_discrete_sequential(palette = "Mint")
+    
+  }
+  
+  TestDF <- DF %>% 
+    dplyr::select(all_of(Covar), all_of(SocialCovar), all_of(DensityCovar), 
+                  Focal.ring, Resps[r], X, Y) %>% 
+    mutate_at(SocialCovar, ~as.numeric(as.character(.x))) %>%
+    mutate_at(SocialCovar[3], ~log(.x+1)) %>% mutate_at(SocialCovar[4], ~kader:::cuberoot(.x)) %>% 
+    na.omit
+  
+  TestDF %<>% mutate_at(c(Resps[r], SocialCovar), ~c(scale(.x)))
+  
+  IM2 <- INLAModelAdd(Data = TestDF, 
+                      Response = Resps[r], 
+                      Explanatory = Covar, 
+                      Add = SocialCovar %>% c(DensityCovar),
+                      AllModels = T,
+                      Base = T,
+                      # Rounds = 1,
+                      Clashes = ClashList,
+                      Random = "Focal.ring", RandomModel = "iid",
+                      AddSpatial = T)
+  
+  # IM2$FinalModel %>% Efxplot()
+  
+  IMList[[Resps[r]]] <- IM2
+  
+}
+
+IMListM <- IMList
+
+
+IMList %>% map("FinalModel") %>% 
+  Efxplot(ModelNames = Resps, PointOutline = T) +
+  scale_colour_brewer(palette = "Spectral") +
+  IMList %>% map(c("Spatial", "Model")) %>% 
+  Efxplot(ModelNames = Resps, PointOutline = T) +
+  scale_colour_brewer(palette = "Spectral") +
+  plot_layout(guides = "collect")
+
+IMList %>% map(~list(.x$FinalModel, .x$Spatial$Model) %>% INLADICFig) %>% ArrangeCowplot()
+
+IMList %>% names %>% 
+  map(~ggField(IMList[[.x]]$Spatial$Model, IMList[[.x]]$Spatial$Mesh) + 
+        labs(fill = .x) +
+        scale_fill_discrete_sequential(palette = "Mint")) %>% 
+  ArrangeCowplot() + 
+  ggsave("Fields.jpeg", units = "mm", width = 400, height = 300)
+
+
+
+
+
+
+
 
 # Sociality as a response ####
 
