@@ -1113,31 +1113,37 @@ zz2014 <- merge(zz2014, spas2014, by=c("focal.ring","year.s"))
 ###putting them back together ?####
 xdata <- rbind(zz2012, zz2013, zz2014)
 
+#clean up
 xdata$bondstrength <- as.numeric(xdata$bondstrength)
+colnames(xdata) <- stringr::str_to_title(colnames(xdata))
+
+###adding oak health info#### 
+HQ <- readRDS("Data/habitatquality.Rds")
+fn.data <- merge(xdata, HQ, by="Box", all.x=TRUE)
 
 #data checks - remove duplicates (from merging?)
 
-fn <- xdata
+fn <- fn.data
 
 fn2<-unique(fn)
-fn2$ring.yr<-paste(fn2$focal.ring,fn2$year.s)
-table(fn2$ring.yr)[table(fn2$ring.yr)>1] 
-fn2.dups<-fn2[fn2$ring.yr%in%fn2$ring.yr[duplicated(fn2$ring.yr)],]
+fn2$Ring.yr<-paste(fn2$Focal.ring,fn2$Year.s)
+table(fn2$Ring.yr)[table(fn2$Ring.yr)>1] 
+fn2.dups<-fn2[fn2$Ring.yr%in%fn2$Ring.yr[duplicated(fn2$Ring.yr)],]
 fn2.dups[1:4,]
-min.dates<-tapply(fn2$april.lay.date,fn2$ring.yr,function(a)min(a))
-fn3<-fn2[paste(fn2$ring.yr,fn2$april.lay.date) %in% paste(names(min.dates),min.dates),]
-fn3$box.yr<-paste(fn3$box,fn3$year.s)
-table(fn3$box.yr)[table(fn3$box.yr)>2] #after removing the above individual-within-year duplicates, we don't appear to have any issues with box-within-year  duplicates either
-table(fn3$box.yr[fn3$parent%in%"mother"])[table(fn3$box.yr[fn3$parent%in%"mother"])>1] #true for just mothers
-table(fn3$box.yr[fn3$parent%in%"father"])[table(fn3$box.yr[fn3$parent%in%"father"])>1] #and true for just fathers
-fath.t<-fn3[fn3$parent=="father",c("box.yr","father","mother")]
-moth.t<-fn3[fn3$parent=="mother",c("box.yr","father","mother")]
-mean(unique(fn3$box.yr) %in% fath.t$box.yr  & unique(fn3$box.yr) %in% moth.t$box.yr) #only minority of the box-year have both the mother and father known?
-both.parents<-unique(fn3$box.yr[fn3$box.yr %in% fath.t$box.yr  & fn3$box.yr %in% moth.t$box.yr])
-fath.b<-fath.t[match(both.parents,fath.t$box.yr),]
-moth.b<-moth.t[match(both.parents,moth.t$box.yr),]
-mean(fath.b$father ==moth.b$father)
-mean(fath.b$mother ==moth.b$mother)
+min.dates<-tapply(fn2$April.lay.date,fn2$Ring.yr,function(a)min(a))
+fn3<-fn2[paste(fn2$Ring.yr,fn2$April.lay.date) %in% paste(names(min.dates),min.dates),]
+fn3$Box.yr<-paste(fn3$Box,fn3$Year.s)
+table(fn3$Box.yr)[table(fn3$Box.yr)>2] #after removing the above individual-within-year duplicates, we don't appear to have any issues with box-within-year  duplicates either
+table(fn3$Box.yr[fn3$Parent%in%"mother"])[table(fn3$Box.yr[fn3$Parent%in%"mother"])>1] #true for just mothers
+table(fn3$Box.yr[fn3$Parent%in%"father"])[table(fn3$Box.yr[fn3$Parent%in%"father"])>1] #and true for just fathers
+fath.t<-fn3[fn3$Parent=="father",c("Box.yr","Father","Mother")]
+moth.t<-fn3[fn3$Parent=="mother",c("Box.yr","Father","Mother")]
+mean(unique(fn3$Box.yr) %in% fath.t$Box.yr  & unique(fn3$Box.yr) %in% moth.t$Box.yr) #only minority of the box-year have both the mother and father known?
+both.parents<-unique(fn3$Box.yr[fn3$Box.yr %in% fath.t$Box.yr  & fn3$Box.yr %in% moth.t$Box.yr])
+fath.b<-fath.t[match(both.parents,fath.t$Box.yr),]
+moth.b<-moth.t[match(both.parents,moth.t$Box.yr),]
+mean(fath.b$Father ==moth.b$Father)
+mean(fath.b$Mother ==moth.b$Mother)
 
 #DONE
 
