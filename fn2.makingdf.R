@@ -149,7 +149,8 @@ names(xdata)[names(xdata) == "age"] <- "focal.age"
 #2011 
 net2011 <- l.am.t[[1]]
 Strength <- colSums(net2011)
-Strength_Mean <- colMeans(net2011) 
+Num <- (colSums(net2011 != 0))
+Strength_Mean <- Strength / Num
 Degree <- sna::degree(net2011)
 ring <- row.names(net2011)
 
@@ -163,7 +164,8 @@ met2011.w <- x
 #2012 
 net2012 <- l.am.t[[2]]
 Strength <- colSums(net2012)
-Strength_Mean <- colMeans(net2012) 
+Num <- (colSums(net2012 != 0))
+Strength_Mean <- Strength / Num
 Degree <- sna::degree(net2012)
 ring <- row.names(net2012)
 
@@ -176,7 +178,8 @@ met2012.w <- x
 #2013 
 net2013 <- l.am.t[[3]]
 Strength <- colSums(net2013)
-Strength_Mean <- colMeans(net2013) 
+Num <- (colSums(net2013 != 0))
+Strength_Mean <- Strength / Num
 Degree <- sna::degree(net2013)
 ring <- row.names(net2013)
 
