@@ -29,7 +29,7 @@ DensityCovar <- c("LifetimeDensity", "AnnualDensity")
 #   ggpairs()
 
 ClashList <- list(
-  c("Strength_mean", "Degree"),
+  c("Strength_mean", "Degree", "Spatial.assoc"),
   c(SocialCovar[c(4:6)]),
   DensityCovar
 )
@@ -87,10 +87,10 @@ for(r in r:length(Resps)){
     filter(Focal.sex == "F") %>% 
     dplyr::select(all_of(Covar), all_of(SocialCovar), all_of(DensityCovar), 
                   Focal.ring, Resps[r], X, Y) %>% 
-    mutate_at("Year.w", as.factor) %>%
     mutate_at(SocialCovar, ~as.numeric(as.character(.x))) %>%
     mutate_at(SocialCovar[3], ~log(.x+1)) %>% mutate_at(SocialCovar[4], ~kader:::cuberoot(.x)) %>% 
-    na.omit
+    na.omit %>% droplevels %>% 
+    mutate_at("Year.w", as.factor)
   
   TestDF %>% nrow %>% print
   
@@ -139,10 +139,10 @@ for(r in r:length(Resps)){
 
 IMListF <- IMList
 
-female <- IMListF %>% map(c("Model1","FinalModel")) %>% 
+female <- IMListF %>% map(c("Model1", "FinalModel")) %>% 
   Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F) +
   scale_colour_brewer(palette = "Spectral") +
-  IMListF %>% map(c("Spatial", "Model")) %>% 
+  IMListF %>% map(c("Model1", "Spatial", "Model")) %>% 
   Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F) +
   scale_colour_brewer(palette = "Spectral") +
   plot_layout(guides = "collect")
@@ -200,11 +200,11 @@ for(r in r:length(Resps)){
   TestDF <- DF %>% 
     filter(Focal.sex == "M") %>% 
     dplyr::select(all_of(Covar), all_of(SocialCovar), all_of(DensityCovar), 
-                  Focal.ring, Resps[r], X, Y) %>% 
-    mutate_at("Year.w", as.factor) %>%
+                  Focal.ring, Resps[r], X, Y) %>%
     mutate_at(SocialCovar, ~as.numeric(as.character(.x))) %>%
     mutate_at(SocialCovar[3], ~log(.x+1)) %>% mutate_at(SocialCovar[4], ~kader:::cuberoot(.x)) %>% 
-    na.omit
+    na.omit %>% droplevels %>% 
+    mutate_at("Year.w", as.factor)
   
   TestDF %<>% mutate_at(c(Resps[r], SocialCovar), ~c(scale(.x)))
   
@@ -250,16 +250,17 @@ for(r in r:length(Resps)){
 
 IMListM <- IMList
 
-
-male <- IMListM %>% map("FinalModel") %>% 
-  Efxplot(ModelNames = Resps, PointOutline = T, Intercept=F) +
+male <- IMListM %>% map(c("Model1", "FinalModel")) %>% 
+  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F) +
   scale_colour_brewer(palette = "Spectral") +
-  IMListM %>% map(c("Spatial", "Model")) %>% 
-  Efxplot(ModelNames = Resps, PointOutline = T, Intercept=F) +
+  IMListM %>% map(c("Model1", "Spatial", "Model")) %>% 
+  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F) +
   scale_colour_brewer(palette = "Spectral") +
   plot_layout(guides = "collect")
 
-IMListM %>% map(~list(.x$FinalModel, .x$Spatial$Model) %>% INLADICFig) %>% ArrangeCowplot()
+IMListM %>% 
+  map("Model1") %>% 
+  map(~list(.x$FinalModel, .x$Spatial$Model) %>% INLADICFig) %>% ArrangeCowplot()
 
 IMListM %>% names %>% 
   map(~ggField(IMListM[[.x]]$Spatial$Model, IMListM[[.x]]$Spatial$Mesh) + 
