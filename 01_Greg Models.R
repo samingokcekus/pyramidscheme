@@ -139,7 +139,7 @@ for(r in r:length(Resps)){
 
 IMListF <- IMList
 
-female <- IMListF %>% map("FinalModel") %>% 
+female <- IMListF %>% map(c("Model1","FinalModel")) %>% 
   Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F) +
   scale_colour_brewer(palette = "Spectral") +
   IMListF %>% map(c("Spatial", "Model")) %>% 
