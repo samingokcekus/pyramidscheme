@@ -29,9 +29,9 @@ DensityCovar <- c("LifetimeDensity", "AnnualDensity")
 #   ggpairs()
 
 ClashList <- list(
-  c("Strength_mean", "Degree", "Spatial.assoc"),
-  c(SocialCovar[c(4:6)]),
-  DensityCovar
+  c("Strength_mean", "Degree"),
+  c("AnnualDensity", "Spatial.assoc", "LifetimeDensity"),
+  c(SocialCovar[c(4:6)])
 )
 
 Covar <- c("Age_num", "Year.w", "Largeoaks")
@@ -197,7 +197,7 @@ for(r in r:length(Resps)){
     
   }
   
-  TestDF <- DF %>% 
+  TestDF <- DF_all %>% 
     filter(Focal.sex == "M") %>% 
     dplyr::select(all_of(Covar), all_of(SocialCovar), all_of(DensityCovar), 
                   Focal.ring, Resps[r], X, Y) %>%
@@ -284,7 +284,7 @@ SpocialList <- list()
 
 r <- 1
 
-TestDF <- DF %>% 
+TestDF <- DF_all %>% 
   dplyr::select(all_of(Covar), 
                 all_of(DensityCovar), 
                 all_of(SocialCovar), Focal.ring, X, Y) %>% 
@@ -326,6 +326,6 @@ SpocialList %>% names %>%
   ArrangeCowplot() + 
   ggsave("SpocialFields.jpeg", units = "mm", width = 400, height = 300)
 
-SpocialList %>% map("FinalModel") %>% Efxplot(ModelNames = Resps) +
-  SpocialList %>% map(c("Spatial", "Model")) %>% Efxplot(ModelNames = Resps) +
+SpocialList %>% map("FinalModel") %>% Efxplot(ModelNames = SocialCovar) +
+  SpocialList %>% map(c("Spatial", "Model")) %>% Efxplot(ModelNames = SocialCovar) +
   plot_layout(guides = "collect")
