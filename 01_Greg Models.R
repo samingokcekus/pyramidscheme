@@ -2,11 +2,16 @@
 # 0_Greg Script ####
 
 library(tidyverse); library(magrittr); library(ggregplot); library(cowplot); library(colorspace)
-library(GGally); library(patchwork); library(dplyr); library(beepr)
+library(GGally); library(patchwork); library(dplyr); library(beepr); library(sf)
 
 theme_set(theme_cowplot())
 
 DF_all <- readRDS("Data/CleanData.rds")
+
+WoodOutline <- st_read("woodoutlinefiles")
+
+WoodOutline %<>% slice(1)
+
 
 Resps <- c("April.lay.date",
            "Binary.succ",
@@ -140,22 +145,26 @@ for(r in r:length(Resps)){
 IMListF <- IMList
 
 female <- IMListF %>% map(c("Model1", "FinalModel")) %>% 
-  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F) +
-  scale_colour_brewer(palette = "Spectral") +
+  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F, Size = 3) +
+  scale_colour_brewer(palette = "Set1") +
+  guides(color = guide_legend(reverse = T)) +
   IMListF %>% map(c("Model1", "Spatial", "Model")) %>% 
-  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F) +
-  scale_colour_brewer(palette = "Spectral") +
+  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F, Size = 3) +
+  scale_colour_brewer(palette = "Set1") +
+  guides(color = guide_legend(reverse = T)) +
   plot_layout(guides = "collect")
+
 
 IMListF %>% map(~list(.x$FinalModel, .x$Spatial$Model) %>% INLADICFig) %>% ArrangeCowplot()
 
-IMListF %>% names %>% 
-  map(~ggField(IMListF[[.x]]$Spatial$Model, IMListF[[.x]]$Spatial$Mesh) + 
-        labs(fill = .x) +
-        scale_fill_discrete_sequential(palette = "Mint")) %>% 
-  ArrangeCowplot() + 
-  ggsave("Fields.jpeg", units = "mm", width = 400, height = 300)
-
+  
+  IMListF %>% names %>% 
+    map(~ggField(IMListF[[.x]]$Model1$Spatial$Model, IMListF[[.x]]$Model1$Spatial$Mesh) + 
+          labs(fill = .x) +
+          geom_sf(data = WoodOutline, inherit.aes = F, fill = NA, colour = "black") +
+          scale_fill_discrete_sequential(palette = "SunsetDark")) %>% 
+    ArrangeCowplot()
+  
 ###MALE####
 
 # DF <- DF_all[which(DF_all$Focal.sex == "M"),]
@@ -251,11 +260,13 @@ for(r in r:length(Resps)){
 IMListM <- IMList
 
 male <- IMListM %>% map(c("Model1", "FinalModel")) %>% 
-  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F) +
-  scale_colour_brewer(palette = "Spectral") +
+  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F, Size = 3) +
+  scale_colour_brewer(palette = "Set1") +
+  guides(color = guide_legend(reverse = T)) +
   IMListM %>% map(c("Model1", "Spatial", "Model")) %>% 
-  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F) +
-  scale_colour_brewer(palette = "Spectral") +
+  Efxplot(ModelNames = Resps, PointOutline = T, Intercept = F, Size = 3) +
+  scale_colour_brewer(palette = "Set1") +
+  guides(color = guide_legend(reverse = T)) +
   plot_layout(guides = "collect")
 
 IMListM %>% 
@@ -263,17 +274,11 @@ IMListM %>%
   map(~list(.x$FinalModel, .x$Spatial$Model) %>% INLADICFig) %>% ArrangeCowplot()
 
 IMListM %>% names %>% 
-  map(~ggField(IMListM[[.x]]$Spatial$Model, IMListM[[.x]]$Spatial$Mesh) + 
+  map(~ggField(IMListM[[.x]]$Model1$Spatial$Model, IMListM[[.x]]$Model1$Spatial$Mesh) + 
         labs(fill = .x) +
-        scale_fill_discrete_sequential(palette = "Mint")) %>% 
-  ArrangeCowplot() + 
-  ggsave("Fields.jpeg", units = "mm", width = 400, height = 300)
-
-
-
-
-
-
+        geom_sf(data = WoodOutline, inherit.aes = F, fill = NA, colour = "black") +
+        scale_fill_discrete_sequential(palette = "SunsetDark")) %>% 
+  ArrangeCowplot() 
 
 
 # Sociality as a response ####
