@@ -449,7 +449,27 @@ IMListF %>%
       mutate_at(2:4+1, ~round(.x, 3)) %>% 
       mutate(Significant = as.numeric(Lower*Upper > 0))
     
-  })
+  }) -> femalemodeloutput
+
+x <- femalemodeloutput$April.lay.date
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="f.lay.html")
+
+x <- femalemodeloutput$Binary.succ
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="f.bs.html")
+
+x <- femalemodeloutput$Clutch.size
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="f.clutch.html")
+
+x <- femalemodeloutput$Mean.chick.weight
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="f.weight.html")
+
+x <- femalemodeloutput$Num.fledglings
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="f.nf.html")
 
 IMListF %>% 
   map(function(a){
@@ -469,8 +489,27 @@ IMListF %>%
       mutate_at(2:4+1, ~round(.x, 3)) %>% 
       mutate(Significant = as.numeric(Lower*Upper > 0))
     
-  })
+  }) -> femalemodeloutputspatial
 
+x <- femalemodeloutputspatial$April.lay.date
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="f.lay.s.html")
+
+x <- femalemodeloutputspatial$Binary.succ
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="f.bs.s.html")
+
+x <- femalemodeloutputspatial$Clutch.size
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="f.clutch.s.html")
+
+x <- femalemodeloutputspatial$Mean.chick.weight
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="f.weight.s.html")
+
+x <- femalemodeloutputspatial$Num.fledglings
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="f.nf.s.html")
 
 ###male#### 
 
@@ -494,7 +533,28 @@ IMListM %>%
       mutate_at(2:4+1, ~round(.x, 3)) %>% 
       mutate(Significant = as.numeric(Lower*Upper > 0))
     
-  })
+  }) -> malemodeloutput
+
+x <- malemodeloutput$April.lay.date
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="m.lay.html")
+
+x <- malemodeloutput$Binary.succ
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="m.bs.html")
+
+x <- malemodeloutput$Clutch.size
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="m.clutch.html")
+
+x <- malemodeloutput$Mean.chick.weight
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="m.weight.html")
+
+x <- malemodeloutput$Num.fledglings
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="m.nf.html")
+
 
 IMListM %>% 
   map(function(a){
@@ -514,9 +574,30 @@ IMListM %>%
       mutate_at(2:4+1, ~round(.x, 3)) %>% 
       mutate(Significant = as.numeric(Lower*Upper > 0))
     
-  })
+  }) -> malemodeloutputspatial
 
 
+
+
+x <- malemodeloutputspatial$April.lay.date
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="m.lay.s.html")
+
+x <- malemodeloutputspatial$Binary.succ
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="m.bs.s.html")
+
+x <- malemodeloutputspatial$Clutch.size
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="m.clutch.s.html")
+
+x <- malemodeloutputspatial$Mean.chick.weight
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="m.weight.s.html")
+
+x <- malemodeloutputspatial$Num.fledglings
+x <- xtable::xtable(x)
+xtable::print.xtable(x, type="html", file="m.nf.s.html")
 
 
 #### quick number of fledglings accounting for laydate #### 
